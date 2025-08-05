@@ -45,5 +45,101 @@
   const app = express();
   
   app.use(bodyParser.json());
+
+  let todos = [];
+  
+  app.get('/todos',(req,res)=>{
+    res.json(todos)
+  })
+
+  app.get('/todo/:id',(req,res)=>{
+    let id = req.params.id
+    
+    todos.forEach((todo)=>{
+      if(todo.id==id){
+        res.json(todo)
+      }
+      else{
+        res.status(404).json({msg:"Not found"})
+      }
+    })
+  })
+
+
+  let id=1;
+  app.post('/todos',(req,res)=>{
+    
+    const title  = req.body.title
+    const completed = req.body.completed
+    const description = req.body.description
+
+    todos.push({
+      id,
+      title,
+      completed,
+      description
+    })
+
+    res.json({id})
+
+    id++
+  })
+
+  app.put('/todos/:id',(req,res)=>{
+    const id = req.params.id
+    let new_title = req.body.title
+    let completed = req.body.completed
+
+    todos.forEach((todo)=>{
+
+      if(todo.id==id){
+
+        todo.title=new_title
+        todo.completed=completed
+
+        res.json({msg:`todo id number ${id} updated`})
+
+      }
+      else{
+
+         res.status(404).json({
+          msg:'Not found'
+         })
+
+      }
+    })
+
+  })
+
+
+  app.delete('/todos/:id',(req,res)=>{
+    const id = req.params.id
+    let inthelist = false
+    todos.forEach((todo)=>{
+
+      if(todo.id==id){
+        const index = todos.indexOf(todo)
+        todos.splice(index,1)
+        inthelist=true;
+      }
+      
+    })
+
+
+    if(inthelist){
+        res.json({
+          msg:`todo id number ${id} deleted`
+        })
+    }
+    else{
+         res.status(404).json({msg:"not found"})
+    }
+
+
+    
+
+  })
+
+  app.listen(3000)
   
   module.exports = app;

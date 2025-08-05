@@ -17,5 +17,46 @@ const fs = require('fs');
 const path = require('path');
 const app = express();
 
+//accessing the files path
+let filespath = path.resolve(__dirname,'files')
+const filelist = [{file:"a.txt"},{file:"b.txt"},{file:"c.txt"}]
+
+
+
+app.get('/files',function (req,res){
+    res.json(filelist)
+})
+
+app.get('/file/:filepath',function (req,res){
+
+  const fileparam = req.params.filepath;
+  let   Paraminthelist = false;
+
+  for ( let i=0;i<filelist.length;i++){
+    console.log(fileparam)
+    if(filelist[i].file==fileparam){
+      Paraminthelist = true;
+    } 
+  }
+
+  if(Paraminthelist){
+    fs.readFile(path.join(filespath,fileparam),'utf-8',(err,data)=>{
+      res.json({
+      "data":data
+    })
+    })
+    
+  }
+  else{
+    res.status(411).json('Enter correct parameter ')
+  }
+  
+  
+})
+
+
+app.listen(3000)
+
+
 
 module.exports = app;
