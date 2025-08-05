@@ -41,12 +41,14 @@
  */
   const express = require('express');
   const bodyParser = require('body-parser');
+  let  fs = require('fs');
   
   const app = express();
   
   app.use(bodyParser.json());
 
-  let todos = [];
+  data = fs.readFileSync('todos.json','utf-8');
+  todos = JSON.parse(data);
   
   app.get('/todos',(req,res)=>{
     res.json(todos)
@@ -65,8 +67,9 @@
     })
   })
 
+  let n = todos.length
 
-  let id=1;
+  let id = n ? todos[n-1].id : 0;
   app.post('/todos',(req,res)=>{
     
     const title  = req.body.title
@@ -81,7 +84,8 @@
     })
 
     res.json({id})
-
+    
+      writetoJson();
     id++
   })
 
@@ -89,7 +93,7 @@
     const id = req.params.id
     let new_title = req.body.title
     let completed = req.body.completed
-
+    let flag = false;
     todos.forEach((todo)=>{
 
       if(todo.id==id){
@@ -98,35 +102,32 @@
         todo.completed=completed
 
         res.json({msg:`todo id number ${id} updated`})
-
-      }
-      else{
-
-         res.status(404).json({
-          msg:'Not found'
-         })
-
+        flag = true;
       }
     })
-
+    if(!flag){res.status(404).json({msg:"updated successfully"})}
+    writetoJson();
   })
 
 
   app.delete('/todos/:id',(req,res)=>{
     const id = req.params.id
     let inthelist = false
+    let index=0;
+    let idindex;
     todos.forEach((todo)=>{
 
       if(todo.id==id){
-        const index = todos.indexOf(todo)
-        todos.splice(index,1)
+        idindex = index;
         inthelist=true;
       }
+      index++;
       
     })
 
 
     if(inthelist){
+        todos.splice(idindex,1);
         res.json({
           msg:`todo id number ${id} deleted`
         })
@@ -136,9 +137,15 @@
     }
 
 
-    
+      writetoJson();
 
   })
+
+
+  function writetoJson(){
+    let data = JSON.stringify(todos)
+    fs.writeFile('todos.json',data,(err,data)=>{})
+  }
 
   app.listen(3000)
   
