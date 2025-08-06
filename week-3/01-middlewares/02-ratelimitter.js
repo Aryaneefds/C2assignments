@@ -16,6 +16,18 @@ setInterval(() => {
     numberOfRequestsForUser = {};
 }, 1000)
 
+function ratelimiter(req,res,next){
+    const id = req.header['user-id']
+    numberOfRequestsForUser[id] = (numberOfRequestsForUser[id] || 0) +1
+    // if(numberOfRequestsForUser[id]){ numberOfRequestsForUser[id]++}
+    // else{numberOfRequestsForUser[id]=1}
+
+    if(numberOfRequestsForUser[id] > 5 ){ res.status(404).json({msg:"Limit reached try after 1 second"})}
+    else{ next()}
+}
+
+app.use(ratelimiter)
+
 app.get('/user', function(req, res) {
   res.status(200).json({ name: 'john' });
 });
@@ -23,5 +35,7 @@ app.get('/user', function(req, res) {
 app.post('/user', function(req, res) {
   res.status(200).json({ msg: 'created dummy user' });
 });
+
+app.listen(3000)
 
 module.exports = app;
